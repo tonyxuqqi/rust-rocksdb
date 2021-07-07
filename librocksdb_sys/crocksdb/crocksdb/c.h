@@ -75,6 +75,7 @@ typedef struct crocksdb_t crocksdb_t;
 typedef struct crocksdb_status_ptr_t crocksdb_status_ptr_t;
 typedef struct crocksdb_backup_engine_t crocksdb_backup_engine_t;
 typedef struct crocksdb_backup_engine_info_t crocksdb_backup_engine_info_t;
+typedef struct crocksdb_checkpoint_t crocksdb_checkpoint_t;
 typedef struct crocksdb_restore_options_t crocksdb_restore_options_t;
 typedef struct crocksdb_lru_cache_options_t crocksdb_lru_cache_options_t;
 typedef struct crocksdb_cache_t crocksdb_cache_t;
@@ -279,6 +280,14 @@ extern C_ROCKSDB_LIBRARY_API void crocksdb_backup_engine_info_destroy(
 
 extern C_ROCKSDB_LIBRARY_API void crocksdb_backup_engine_close(
     crocksdb_backup_engine_t* be);
+
+extern C_ROCKSDB_LIBRARY_API crocksdb_checkpoint_t* crocksdb_checkpoint_object_create(crocksdb_t* db, char** errptr);
+
+extern C_ROCKSDB_LIBRARY_API void rocksdb_checkpoint_create(crocksdb_checkpoint_t* checkpoint,
+                               const char* checkpoint_dir,
+                               uint64_t log_size_for_flush, char** errptr);
+
+extern C_ROCKSDB_LIBRARY_API void rocksdb_checkpoint_object_destroy(crocksdb_checkpoint_t* checkpoint);
 
 extern C_ROCKSDB_LIBRARY_API crocksdb_t* crocksdb_open_column_families(
     const crocksdb_options_t* options, const char* name,

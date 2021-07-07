@@ -175,6 +175,7 @@ pub struct DBSstPartitionerFactory(c_void);
 pub struct DBWriteBatchIterator(c_void);
 #[repr(C)]
 pub struct DBFileSystemInspectorInstance(c_void);
+pub enum DbCheckpoint {}
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
@@ -2291,6 +2292,19 @@ extern "C" {
         output_level: c_int,
         errptr: *mut *mut c_char,
     );
+
+    // Checkpoint
+    pub fn crocksdb_checkpoint_object_create(
+        db: *mut DBInstance,
+        errptr: *mut *mut c_char,
+    ) -> *mut DbCheckpoint;
+    pub fn crocksdb_checkpoint_create(
+        check_point: *mut DbCheckpoint,
+        check_point_dir: *const c_char,
+        log_size_for_flush: u64,
+        errptr: *mut *mut c_char,
+    );
+    pub fn crocksdb_checkpoint_object_destroy(check_point: *mut DbCheckpoint);
 
     pub fn crocksdb_get_perf_level() -> c_int;
     pub fn crocksdb_set_perf_level(level: c_int);
