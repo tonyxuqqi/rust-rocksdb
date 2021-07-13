@@ -567,14 +567,16 @@ impl DB {
         const ERR_NULL_CF_HANDLE: &str = "Received null column family handle from DB";
 
         let cpath = CString::new(path.as_bytes()).map_err(|_| ERR_CONVERT_PATH.to_owned())?;
-        fs::create_dir_all(&Path::new(path)).map_err(|e| {
-            format!(
-                "Failed to create rocksdb directory: \
-                 src/rocksdb.rs:                              \
-                 {:?}",
-                e
-            )
-        })?;
+        if !error_if_log_file_exist.is_some() {
+            fs::create_dir_all(&Path::new(path)).map_err(|e| {
+                format!(
+                    "Failed to create rocksdb directory: \
+                    src/rocksdb.rs:                              \
+                    {:?}",
+                    e
+                )
+            })?;
+        }
 
         let mut descs = cfds.into_iter().map(|t| t.into()).collect();
         let mut ttls_vec = ttls.to_vec();
@@ -730,6 +732,34 @@ impl DB {
         let cpath = CString::new(path.as_bytes()).unwrap();
         unsafe {
             ffi_try!(crocksdb_destroy_db(opts.inner, cpath.as_ptr()));
+        }
+        Ok(())
+    }
+
+    pub fn destroy_cf<'a, T>(opts: &DBOptions, path: &str, cfds: Vec<T>) -> Result<(), String>
+    where
+        T: Into<ColumnFamilyDescriptor<'a>>,
+    {
+        let descs = cfds.into_iter().map(|t| t.into()).collect();
+        let cpath = CString::new(path.as_bytes())
+            .map_err(|_| format!("path can't be convert to cstring"))?;
+
+        let (names, options) = split_descriptors(descs, !opts.titan_inner.is_null());
+        let cstrings = build_cstring_list(&names);
+
+        let cf_names: Vec<*const _> = cstrings.iter().map(|cs| cs.as_ptr()).collect();
+        let cf_options: Vec<_> = options
+            .iter()
+            .map(|x| x.inner as *const crocksdb_ffi::Options)
+            .collect();
+        unsafe {
+            ffi_try!(crocksdb_destroy_column_families(
+                opts.inner,
+                cpath.as_ptr(),
+                cf_names.len() as i32,
+                cf_names.as_ptr(),
+                cf_options.as_ptr()
+            ));
         }
         Ok(())
     }

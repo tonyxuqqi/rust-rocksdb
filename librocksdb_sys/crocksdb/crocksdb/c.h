@@ -563,6 +563,11 @@ extern C_ROCKSDB_LIBRARY_API void crocksdb_set_options_cf(
 extern C_ROCKSDB_LIBRARY_API void crocksdb_destroy_db(
     const crocksdb_options_t* options, const char* name, char** errptr);
 
+extern C_ROCKSDB_LIBRARY_API void crocksdb_destroy_column_families(
+    const crocksdb_options_t* options, const char* name,
+    int num_column_families, const char** column_family_names,
+    const crocksdb_options_t** column_family_options, char** errptr);
+
 extern C_ROCKSDB_LIBRARY_API void crocksdb_repair_db(
     const crocksdb_options_t* options, const char* name, char** errptr);
 

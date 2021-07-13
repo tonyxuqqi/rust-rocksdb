@@ -1490,6 +1490,20 @@ void crocksdb_destroy_db(const crocksdb_options_t* options, const char* name,
   SaveError(errptr, DestroyDB(name, options->rep));
 }
 
+void crocksdb_destroy_column_families(
+    const crocksdb_options_t* options, const char* name,
+    int num_column_families, const char** column_family_names,
+    const crocksdb_options_t** column_family_options, char** errptr) {
+  std::vector<ColumnFamilyDescriptor> column_families;
+  for (int i = 0; i < num_column_families; i++) {
+    column_families.push_back(ColumnFamilyDescriptor(
+        std::string(column_family_names[i]),
+        ColumnFamilyOptions(column_family_options[i]->rep)));
+  }
+  
+  SaveError(errptr, DestroyDB(name, options->rep, column_families));
+}
+
 void crocksdb_repair_db(const crocksdb_options_t* options, const char* name,
                         char** errptr) {
   SaveError(errptr, RepairDB(name, options->rep));

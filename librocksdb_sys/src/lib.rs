@@ -1066,6 +1066,14 @@ extern "C" {
     pub fn crocksdb_pause_bg_work(db: *mut DBInstance);
     pub fn crocksdb_continue_bg_work(db: *mut DBInstance);
     pub fn crocksdb_destroy_db(options: *const Options, path: *const c_char, err: *mut *mut c_char);
+    pub fn crocksdb_destroy_column_families(
+        options: *const Options,
+        path: *const c_char,
+        num_column_families: c_int,
+        column_family_names: *const *const c_char,
+        column_family_options: *const *const Options,
+        err: *mut *mut c_char,
+    );
     pub fn crocksdb_repair_db(options: *const Options, path: *const c_char, err: *mut *mut c_char);
     // Merge
     pub fn crocksdb_merge(
