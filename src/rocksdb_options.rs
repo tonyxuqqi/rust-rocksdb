@@ -45,6 +45,29 @@ use table_properties_collector_factory::{
 };
 use titan::TitanDBOptions;
 
+pub struct Statistics {
+    statics: *mut crocksdb_ffi::Statistics,
+}
+
+impl Statistics {
+    pub fn new() -> Statistics {
+        Statistics {
+            statics: unsafe { crocksdb_ffi::crocksdb_create_statistics() },
+        }
+    }
+}
+
+unsafe impl Send for Statistics {}
+unsafe impl Sync for Statistics {}
+
+impl Drop for Statistics {
+    fn drop(&mut self) {
+        unsafe {
+            crocksdb_ffi::crocksdb_destroy_statistics(self.statics);
+        }
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct HistogramData {
     pub median: f64,
@@ -871,6 +894,12 @@ impl DBOptions {
     pub fn enable_statistics(&mut self, v: bool) {
         unsafe {
             crocksdb_ffi::crocksdb_options_enable_statistics(self.inner, v);
+        }
+    }
+
+    pub fn set_statistics(&mut self, stats: &Statistics) {
+        unsafe {
+            crocksdb_ffi::crocksdb_options_set_statistics(self.inner, stats.statics);
         }
     }
 

@@ -140,6 +140,7 @@ using rocksdb::SstFileWriter;
 using rocksdb::SstPartitioner;
 using rocksdb::SstPartitionerFactory;
 using rocksdb::Status;
+using rocksdb::Statistics;
 using rocksdb::SubcompactionJobInfo;
 using rocksdb::TableProperties;
 using rocksdb::TablePropertiesCollection;
@@ -273,6 +274,9 @@ struct crocksdb_writablefile_t {
 };
 struct crocksdb_filelock_t {
   FileLock* rep;
+};
+struct crocksdb_statistics_t {
+  shared_ptr<Statistics> rep;
 };
 struct crocksdb_logger_t {
   shared_ptr<Logger> rep;
@@ -2666,6 +2670,21 @@ crocksdb_options_get_sst_partitioner_factory(crocksdb_options_t* opt) {
 void crocksdb_options_set_sst_partitioner_factory(
     crocksdb_options_t* opt, crocksdb_sst_partitioner_factory_t* factory) {
   opt->rep.sst_partitioner_factory = factory->rep;
+}
+
+crocksdb_statistics_t* crocksdb_create_statistics() {
+  crocksdb_statistics_t* stats = new crocksdb_statistics_t;
+  stats->rep = rocksdb::CreateDBStatistics();
+  return stats;
+}
+
+void crocksdb_options_set_statistics(
+    crocksdb_options_t* opt, crocksdb_statistics_t* stats) {
+  opt->rep.statistics = stats->rep;
+}
+
+void crocksdb_destroy_statistics(crocksdb_statistics_t* stats) {
+  delete stats;
 }
 
 void crocksdb_options_enable_statistics(crocksdb_options_t* opt,
