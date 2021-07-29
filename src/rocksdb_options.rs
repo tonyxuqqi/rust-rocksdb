@@ -1061,9 +1061,7 @@ impl DBOptions {
             DEFAULT_REFILL_PERIOD_US,
             DEFAULT_FAIRNESS,
         );
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_ratelimiter(self.inner, rate_limiter.inner);
-        }
+        self.set_rate_limiter(&rate_limiter);
     }
 
     pub fn set_ratelimiter_with_auto_tuned(
@@ -1080,9 +1078,7 @@ impl DBOptions {
             mode,
             auto_tuned,
         );
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_ratelimiter(self.inner, rate_limiter.inner);
-        }
+        self.set_rate_limiter(&rate_limiter);
     }
 
     pub fn set_writeampbasedratelimiter_with_auto_tuned(
@@ -1099,8 +1095,12 @@ impl DBOptions {
             mode,
             auto_tuned,
         );
+        self.set_rate_limiter(&rate_limiter);
+    }
+
+    pub fn set_rate_limiter(&mut self, limiter: &RateLimiter) {
         unsafe {
-            crocksdb_ffi::crocksdb_options_set_ratelimiter(self.inner, rate_limiter.inner);
+            crocksdb_ffi::crocksdb_options_set_ratelimiter(self.inner, limiter.inner);
         }
     }
 
