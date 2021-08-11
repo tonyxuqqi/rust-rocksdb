@@ -104,6 +104,7 @@ pub mod table_properties_rc;
 mod table_properties_rc_handles;
 mod titan;
 mod write_batch;
+pub mod write_buffer_manager;
 
 #[cfg(test)]
 fn tempdir_with_prefix(prefix: &str) -> tempfile::TempDir {

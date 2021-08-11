@@ -178,6 +178,8 @@ pub struct DBFileSystemInspectorInstance(c_void);
 pub enum DbCheckpoint {}
 pub enum Statistics {}
 
+pub enum DBWriteBufferManager {}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum WriteStallCondition {
@@ -2543,6 +2545,16 @@ extern "C" {
         argv: *const *const c_char,
         opts: *const Options,
     );
+
+    // WriteBufferManager
+    pub fn crocksdb_writebuffermanager_create(buffer_size: size_t, cache: *const DBCache) -> *mut DBWriteBufferManager;
+    pub fn crocksdb_writebuffermanager_enabled(mgr: *const DBWriteBufferManager) -> bool;
+    pub fn crocksdb_writebuffermanager_cost_to_cache(mgr: *const DBWriteBufferManager) -> bool;
+    pub fn crocksdb_writebuffermanager_memory_usage(mgr: *const DBWriteBufferManager) -> size_t;
+    pub fn crocksdb_writebuffermanager_mutable_memtable_memory_usage(mgr: *const DBWriteBufferManager) -> size_t;
+    pub fn crocksdb_writebuffermanager_buffer_size(mgr: * const DBWriteBufferManager) -> size_t;
+    pub fn crocksdb_writebuffermanager_destroy(mgr: *const DBWriteBufferManager);
+    pub fn crocksdb_options_set_writebuffermanager(opts: *mut Options, mgr: *const DBWriteBufferManager);
 }
 
 // Titan

@@ -110,6 +110,7 @@ typedef struct crocksdb_slicetransform_t crocksdb_slicetransform_t;
 typedef struct crocksdb_snapshot_t crocksdb_snapshot_t;
 typedef struct crocksdb_writablefile_t crocksdb_writablefile_t;
 typedef struct crocksdb_writebatch_t crocksdb_writebatch_t;
+typedef struct crocksdb_writebuffermanager_t crocksdb_writebuffermanager_t;
 typedef struct crocksdb_writeoptions_t crocksdb_writeoptions_t;
 typedef struct crocksdb_universal_compaction_options_t
     crocksdb_universal_compaction_options_t;
@@ -2640,6 +2641,26 @@ extern C_ROCKSDB_LIBRARY_API void ctitandb_delete_blob_files_in_ranges_cf(
     const char* const* start_keys, const size_t* start_keys_lens,
     const char* const* limit_keys, const size_t* limit_keys_lens,
     size_t num_ranges, unsigned char include_end, char** errptr);
+
+/* WriteBufferManager */
+extern C_ROCKSDB_LIBRARY_API crocksdb_writebuffermanager_t* crocksdb_writebuffermanager_create(size_t buffer_size, crocksdb_cache_t *cache);
+
+extern C_ROCKSDB_LIBRARY_API bool crocksdb_writebuffermanager_enabled(const crocksdb_writebuffermanager_t* mgr);
+
+extern C_ROCKSDB_LIBRARY_API bool crocksdb_writebuffermanager_cost_to_cache(const crocksdb_writebuffermanager_t* mgr);
+
+extern C_ROCKSDB_LIBRARY_API size_t crocksdb_writebuffermanager_memory_usage(const crocksdb_writebuffermanager_t* mgr);
+
+extern C_ROCKSDB_LIBRARY_API size_t crocksdb_writebuffermanager_mutable_memtable_memory_usage(const crocksdb_writebuffermanager_t* mgr);
+
+extern C_ROCKSDB_LIBRARY_API size_t crocksdb_writebuffermanager_buffer_size(const crocksdb_writebuffermanager_t* mgr);
+
+extern C_ROCKSDB_LIBRARY_API void crocksdb_writebuffermanager_destroy(crocksdb_writebuffermanager_t* mgr);
+
+extern C_ROCKSDB_LIBRARY_API void
+crocksdb_options_set_writebuffermanager(
+    crocksdb_options_t* opt,
+    const crocksdb_writebuffermanager_t* mgr);
 
 #ifdef __cplusplus
 } /* end extern "C" */

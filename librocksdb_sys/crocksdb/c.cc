@@ -50,6 +50,7 @@
 #include "rocksdb/utilities/options_util.h"
 #include "rocksdb/utilities/table_properties_collectors.h"
 #include "rocksdb/write_batch.h"
+#include "rocksdb/write_buffer_manager.h"
 #include "src/blob_format.h"
 #include "table/block_based/block_based_table_factory.h"
 #include "table/sst_file_writer_collectors.h"
@@ -150,6 +151,7 @@ using rocksdb::UserCollectedProperties;
 using rocksdb::WALRecoveryMode;
 using rocksdb::WritableFile;
 using rocksdb::WriteBatch;
+using rocksdb::WriteBufferManager;
 using rocksdb::WriteOptions;
 using rocksdb::WriteStallCondition;
 using rocksdb::WriteStallInfo;
@@ -230,6 +232,9 @@ struct crocksdb_iterator_t {
 };
 struct crocksdb_writebatch_t {
   WriteBatch rep;
+};
+struct crocksdb_writebuffermanager_t {
+  shared_ptr<WriteBufferManager> mgr;
 };
 struct crocksdb_snapshot_t {
   const Snapshot* rep;
@@ -3285,7 +3290,9 @@ unsigned char crocksdb_options_statistics_get_histogram(
 
 void crocksdb_options_set_ratelimiter(crocksdb_options_t* opt,
                                       crocksdb_ratelimiter_t* limiter) {
-  opt->rep.rate_limiter = limiter->rep;
+  if (limiter) {
+    opt->rep.rate_limiter = limiter->rep;
+  }
 }
 
 crocksdb_ratelimiter_t* crocksdb_options_get_ratelimiter(
@@ -3296,6 +3303,44 @@ crocksdb_ratelimiter_t* crocksdb_options_get_ratelimiter(
     return limiter;
   }
   return nullptr;
+}
+
+crocksdb_writebuffermanager_t* crocksdb_writebuffermanager_create(size_t buffer_size, crocksdb_cache_t *cache) {
+  crocksdb_writebuffermanager_t* mgr = new crocksdb_writebuffermanager_t;
+  if (cache) {
+    mgr->mgr = std::make_shared<WriteBufferManager>(buffer_size, cache->rep);
+  } else {
+    mgr->mgr = std::make_shared<WriteBufferManager>(buffer_size);
+  }
+  return mgr;
+}
+
+void crocksdb_options_set_writebuffermanager(crocksdb_options_t* opt, const crocksdb_writebuffermanager_t* mgr) {
+  opt->rep.write_buffer_manager = mgr->mgr;
+}
+
+bool crocksdb_writebuffermanager_enabled(const crocksdb_writebuffermanager_t* mgr) {
+  return mgr->mgr->enabled();
+}
+
+bool crocksdb_writebuffermanager_cost_to_cache(const crocksdb_writebuffermanager_t* mgr) {
+  return mgr->mgr->cost_to_cache();
+}
+
+size_t crocksdb_writebuffermanager_memory_usage(const crocksdb_writebuffermanager_t* mgr) {
+  return mgr->mgr->memory_usage();
+}
+
+size_t crocksdb_writebuffermanager_mutable_memtable_memory_usage(const crocksdb_writebuffermanager_t* mgr) {
+  return mgr->mgr->mutable_memtable_memory_usage();
+}
+
+size_t crocksdb_writebuffermanager_buffer_size(const crocksdb_writebuffermanager_t* mgr) {
+  return mgr->mgr->buffer_size();
+}
+
+void crocksdb_writebuffermanager_destroy(crocksdb_writebuffermanager_t* mgr) {
+  delete mgr;
 }
 
 void crocksdb_options_set_vector_memtable_factory(crocksdb_options_t* opt,
@@ -3384,9 +3429,6 @@ crocksdb_writeampbasedratelimiter_create_with_auto_tuned(
 }
 
 void crocksdb_ratelimiter_destroy(crocksdb_ratelimiter_t* limiter) {
-  if (limiter->rep) {
-    limiter->rep.reset();
-  }
   delete limiter;
 }
 

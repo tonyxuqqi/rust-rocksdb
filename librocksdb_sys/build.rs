@@ -70,8 +70,6 @@ fn config_binding_path() {
 }
 
 fn main() {
-    println!("cargo:rerun-if-env-changed=UPDATE_BIND");
-
     let mut build = build_rocksdb();
 
     build.cpp(true).file("crocksdb/c.cc");

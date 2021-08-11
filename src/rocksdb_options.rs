@@ -45,6 +45,8 @@ use table_properties_collector_factory::{
 };
 use titan::TitanDBOptions;
 
+use crate::write_buffer_manager::WriteBufferManager;
+
 pub struct Statistics {
     statics: *mut crocksdb_ffi::Statistics,
 }
@@ -1293,6 +1295,12 @@ impl DBOptions {
                 return None;
             }
             Some(CStr::from_ptr(memtable_name).to_str().unwrap())
+        }
+    }
+
+    pub fn set_write_buffer_manager(&mut self, mgr: &WriteBufferManager) {
+        unsafe {
+            crocksdb_ffi::crocksdb_options_set_writebuffermanager(self.inner, mgr.mgr)
         }
     }
 }
