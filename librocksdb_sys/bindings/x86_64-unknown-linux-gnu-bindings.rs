@@ -1738,6 +1738,11 @@ extern "C" {
     ) -> u64;
 }
 extern "C" {
+    pub fn crocksdb_compactionjobinfo_base_input_level(
+        arg1: *const crocksdb_compactionjobinfo_t,
+    ) -> libc::c_int;
+}
+extern "C" {
     pub fn crocksdb_compactionjobinfo_output_level(
         arg1: *const crocksdb_compactionjobinfo_t,
     ) -> libc::c_int;
@@ -5021,6 +5026,12 @@ extern "C" {
         num_ranges: size_t,
         include_end: libc::c_uchar,
         errptr: *mut *mut libc::c_char,
+    );
+}
+extern "C" {
+    pub fn crocksdb_options_set_mutex_owner_timer(
+        arg1: *mut crocksdb_options_t,
+        arg2: libc::c_uchar,
     );
 }
 pub type __builtin_va_list = [__va_list_tag; 1usize];

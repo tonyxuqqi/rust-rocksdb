@@ -2682,6 +2682,7 @@ extern "C" {
         include_end: bool,
         errptr: *mut *mut c_char,
     );
+    pub fn crocksdb_options_set_mutex_owner_timer(options: *mut Options, v: bool);
 }
 
 #[cfg(test)]

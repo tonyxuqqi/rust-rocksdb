@@ -6624,4 +6624,9 @@ void ctitandb_delete_blob_files_in_ranges_cf(
                         cf->rep, &ranges[0], num_ranges, include_end));
 }
 
+void crocksdb_options_set_mutex_owner_timer(crocksdb_options_t* opt,
+                                          unsigned char v) {
+  opt->rep.enable_db_mutex_owned_timer = v;
+}
+
 }  // end extern "C"

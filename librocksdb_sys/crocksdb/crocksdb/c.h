@@ -2622,6 +2622,9 @@ extern C_ROCKSDB_LIBRARY_API void ctitandb_delete_blob_files_in_ranges_cf(
     const char* const* limit_keys, const size_t* limit_keys_lens,
     size_t num_ranges, unsigned char include_end, char** errptr);
 
+extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_mutex_owner_timer(
+    crocksdb_options_t*, unsigned char);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif
