@@ -1181,7 +1181,7 @@ impl DBOptions {
         }
     }
 
-    pub fn enable_set_mutex_owner_timer(&self, v: bool) {
+    pub fn enable_mutex_owner_timer(&self, v: bool) {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_mutex_owner_timer(self.inner, v);
         }
