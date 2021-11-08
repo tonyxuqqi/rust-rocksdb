@@ -5441,7 +5441,7 @@ struct ExternalSstFileModifier {
       return status;
     }
 
-    reteurn Status::OK();
+    return Status::OK();
   }
 
  private:
