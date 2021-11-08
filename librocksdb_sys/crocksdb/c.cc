@@ -140,8 +140,8 @@ using rocksdb::SstFileReader;
 using rocksdb::SstFileWriter;
 using rocksdb::SstPartitioner;
 using rocksdb::SstPartitionerFactory;
-using rocksdb::Status;
 using rocksdb::Statistics;
+using rocksdb::Status;
 using rocksdb::SubcompactionJobInfo;
 using rocksdb::TableProperties;
 using rocksdb::TablePropertiesCollection;
@@ -836,7 +836,7 @@ void crocksdb_backup_engine_close(crocksdb_backup_engine_t* be) {
 }
 
 crocksdb_checkpoint_t* crocksdb_checkpoint_object_create(crocksdb_t* db,
-                                                       char** errptr) {
+                                                         char** errptr) {
   Checkpoint* checkpoint;
   if (SaveError(errptr, Checkpoint::Create(db->rep, &checkpoint))) {
     return nullptr;
@@ -847,8 +847,8 @@ crocksdb_checkpoint_t* crocksdb_checkpoint_object_create(crocksdb_t* db,
 }
 
 void crocksdb_checkpoint_create(crocksdb_checkpoint_t* checkpoint,
-                               const char* checkpoint_dir,
-                               uint64_t log_size_for_flush, char** errptr) {
+                                const char* checkpoint_dir,
+                                uint64_t log_size_for_flush, char** errptr) {
   SaveError(errptr, checkpoint->rep->CreateCheckpoint(
                         std::string(checkpoint_dir), log_size_for_flush));
 }
@@ -1509,7 +1509,7 @@ void crocksdb_destroy_column_families(
         std::string(column_family_names[i]),
         ColumnFamilyOptions(column_family_options[i]->rep)));
   }
-  
+
   SaveError(errptr, DestroyDB(name, options->rep, column_families));
 }
 
@@ -2683,14 +2683,12 @@ crocksdb_statistics_t* crocksdb_create_statistics() {
   return stats;
 }
 
-void crocksdb_options_set_statistics(
-    crocksdb_options_t* opt, crocksdb_statistics_t* stats) {
+void crocksdb_options_set_statistics(crocksdb_options_t* opt,
+                                     crocksdb_statistics_t* stats) {
   opt->rep.statistics = stats->rep;
 }
 
-void crocksdb_destroy_statistics(crocksdb_statistics_t* stats) {
-  delete stats;
-}
+void crocksdb_destroy_statistics(crocksdb_statistics_t* stats) { delete stats; }
 
 void crocksdb_options_enable_statistics(crocksdb_options_t* opt,
                                         unsigned char v) {
@@ -3305,7 +3303,8 @@ crocksdb_ratelimiter_t* crocksdb_options_get_ratelimiter(
   return nullptr;
 }
 
-crocksdb_writebuffermanager_t* crocksdb_writebuffermanager_create(size_t buffer_size, crocksdb_cache_t *cache) {
+crocksdb_writebuffermanager_t* crocksdb_writebuffermanager_create(
+    size_t buffer_size, crocksdb_cache_t* cache) {
   crocksdb_writebuffermanager_t* mgr = new crocksdb_writebuffermanager_t;
   if (cache) {
     mgr->mgr = std::make_shared<WriteBufferManager>(buffer_size, cache->rep);
@@ -3315,27 +3314,33 @@ crocksdb_writebuffermanager_t* crocksdb_writebuffermanager_create(size_t buffer_
   return mgr;
 }
 
-void crocksdb_options_set_writebuffermanager(crocksdb_options_t* opt, const crocksdb_writebuffermanager_t* mgr) {
+void crocksdb_options_set_writebuffermanager(
+    crocksdb_options_t* opt, const crocksdb_writebuffermanager_t* mgr) {
   opt->rep.write_buffer_manager = mgr->mgr;
 }
 
-bool crocksdb_writebuffermanager_enabled(const crocksdb_writebuffermanager_t* mgr) {
+bool crocksdb_writebuffermanager_enabled(
+    const crocksdb_writebuffermanager_t* mgr) {
   return mgr->mgr->enabled();
 }
 
-bool crocksdb_writebuffermanager_cost_to_cache(const crocksdb_writebuffermanager_t* mgr) {
+bool crocksdb_writebuffermanager_cost_to_cache(
+    const crocksdb_writebuffermanager_t* mgr) {
   return mgr->mgr->cost_to_cache();
 }
 
-size_t crocksdb_writebuffermanager_memory_usage(const crocksdb_writebuffermanager_t* mgr) {
+size_t crocksdb_writebuffermanager_memory_usage(
+    const crocksdb_writebuffermanager_t* mgr) {
   return mgr->mgr->memory_usage();
 }
 
-size_t crocksdb_writebuffermanager_mutable_memtable_memory_usage(const crocksdb_writebuffermanager_t* mgr) {
+size_t crocksdb_writebuffermanager_mutable_memtable_memory_usage(
+    const crocksdb_writebuffermanager_t* mgr) {
   return mgr->mgr->mutable_memtable_memory_usage();
 }
 
-size_t crocksdb_writebuffermanager_buffer_size(const crocksdb_writebuffermanager_t* mgr) {
+size_t crocksdb_writebuffermanager_buffer_size(
+    const crocksdb_writebuffermanager_t* mgr) {
   return mgr->mgr->buffer_size();
 }
 
@@ -5401,42 +5406,42 @@ struct ExternalSstFileModifier {
     const auto& uprops = props->user_collected_properties;
     // Validate version and seqno offset
     auto version_iter = uprops.find(ExternalSstFilePropertyNames::kVersion);
-    if (version_iter == uprops.end()) {
-      return Status::Corruption("External file version not found");
-    }
-    uint32_t version = DecodeFixed32(version_iter->second.c_str());
-    if (version != 2) {
-      return Status::NotSupported("External file version should be 2");
+    if (version_iter != uprops.end()) {
+      uint32_t version = DecodeFixed32(version_iter->second.c_str());
+      if (version != 2) {
+        return Status::NotSupported("External file version should be 2");
+      }
     }
 
     auto seqno_iter = uprops.find(ExternalSstFilePropertyNames::kGlobalSeqno);
-    if (seqno_iter == uprops.end()) {
-      return Status::Corruption(
-          "External file global sequence number not found");
-    }
-    *pre_seq_no = DecodeFixed64(seqno_iter->second.c_str());
-    uint64_t offset = props->properties_offsets.at(
-        ExternalSstFilePropertyNames::kGlobalSeqno);
-    if (offset == 0) {
-      return Status::Corruption("Was not able to find file global seqno field");
-    }
+    if (seqno_iter != uprops.end()) {
+      *pre_seq_no = DecodeFixed64(seqno_iter->second.c_str());
+      uint64_t offset = props->properties_offsets.at(
+          ExternalSstFilePropertyNames::kGlobalSeqno);
+      if (offset == 0) {
+        return Status::Corruption(
+            "Was not able to find file global seqno field");
+      }
 
-    if (*pre_seq_no == seq_no) {
-      // This file already have the correct global seqno
-      return Status::OK();
-    }
+      if (*pre_seq_no == seq_no) {
+        // This file already have the correct global seqno
+        return Status::OK();
+      }
 
-    std::unique_ptr<RandomRWFile> rwfile;
-    auto status = env_->NewRandomRWFile(file_, &rwfile, env_options_);
-    if (!status.ok()) {
+      std::unique_ptr<RandomRWFile> rwfile;
+      auto status = env_->NewRandomRWFile(file_, &rwfile, env_options_);
+      if (!status.ok()) {
+        return status;
+      }
+
+      // Write the new seqno in the global sequence number field in the file
+      std::string seqno_val;
+      PutFixed64(&seqno_val, seq_no);
+      status = rwfile->Write(offset, seqno_val);
       return status;
     }
 
-    // Write the new seqno in the global sequence number field in the file
-    std::string seqno_val;
-    PutFixed64(&seqno_val, seq_no);
-    status = rwfile->Write(offset, seqno_val);
-    return status;
+    reteurn Status::OK();
   }
 
  private:
