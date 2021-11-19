@@ -119,4 +119,16 @@ impl<'a> SstFileMetaData<'a> {
             slice::from_raw_parts(ptr as *const u8, len)
         }
     }
+
+    pub fn get_smallest_seqno(&self) -> u64 {
+        unsafe {
+            crocksdb_ffi::crocksdb_sst_file_meta_data_smallest_seqno(self.inner)
+        }
+    }
+
+    pub fn get_largest_seqno(&self) -> u64 {
+        unsafe {
+            crocksdb_ffi::crocksdb_sst_file_meta_data_largest_seqno(self.inner)
+        }
+    }
 }

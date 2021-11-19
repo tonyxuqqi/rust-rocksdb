@@ -67,6 +67,7 @@ extern "C" {
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Exported types */
 
@@ -1813,6 +1814,11 @@ crocksdb_ingest_external_file_optimized(
     crocksdb_t* db, crocksdb_column_family_handle_t* handle,
     const char* const* file_list, const size_t list_len,
     const crocksdb_ingestexternalfileoptions_t* opt, char** errptr);
+extern C_ROCKSDB_LIBRARY_API unsigned char
+crocksdb_ingest_external_file_optimized_with_seqno(
+    crocksdb_t* db, crocksdb_column_family_handle_t* handle,
+    const char* const* file_list, const size_t list_len,
+    const crocksdb_ingestexternalfileoptions_t* opt, const uint64_t* smallest_seqnos, const uint64_t* largest_seqnos, char** errptr);
 
 /* SliceTransform */
 
@@ -2123,6 +2129,10 @@ crocksdb_sst_file_meta_data_smallestkey(const crocksdb_sst_file_meta_data_t*,
                                         size_t*);
 extern C_ROCKSDB_LIBRARY_API const char* crocksdb_sst_file_meta_data_largestkey(
     const crocksdb_sst_file_meta_data_t*, size_t*);
+extern C_ROCKSDB_LIBRARY_API uint64_t 
+crocksdb_sst_file_meta_data_smallest_seqno(const crocksdb_sst_file_meta_data_t*);
+extern C_ROCKSDB_LIBRARY_API uint64_t 
+crocksdb_sst_file_meta_data_largest_seqno(const crocksdb_sst_file_meta_data_t*);
 
 /* CompactFiles */
 extern C_ROCKSDB_LIBRARY_API crocksdb_compaction_options_t*

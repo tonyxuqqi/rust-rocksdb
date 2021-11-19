@@ -4632,6 +4632,54 @@ unsigned char crocksdb_ingest_external_file_optimized(
   return has_flush;
 }
 
+unsigned char crocksdb_ingest_external_file_optimized_with_seqno(
+    crocksdb_t* db, crocksdb_column_family_handle_t* handle,
+    const char* const* file_list, const size_t list_len,
+    const crocksdb_ingestexternalfileoptions_t* opt, const uint64_t* smallest_seqnos, const uint64_t* largest_seqnos, char** errptr)
+{
+  std::vector<std::string> files(list_len);
+  std::vector<std::pair<uint64_t, uint64_t> > seqnos(list_len);
+  for (size_t i = 0; i < list_len; ++i) {
+    files[i] = std::string(file_list[i]);
+    if (smallest_seqnos == NULL || largest_seqnos == NULL) {
+      seqnos[i] = std::pair<uint64_t, uint64_t>(*(smallest_seqnos+i), *(largest_seqnos + i));
+    }
+  }
+  bool has_flush = false;
+  // If the file being ingested is overlapped with the memtable, it
+  // will block writes and wait for flushing, which can cause high
+  // write latency. So we set `allow_blocking_flush = false`.
+  auto ingest_opts = opt->rep;
+  ingest_opts.allow_blocking_flush = false;
+  rocksdb::IngestExternalFileArg arg;
+  arg.column_family = handle->rep;
+  arg.external_files = files;
+  arg.options = ingest_opts;
+  arg.seqnos = seqnos; 
+  auto s = db->rep->IngestExternalFiles({arg});
+  if (s.IsInvalidArgument() &&
+      s.ToString().find("External file requires flush") != std::string::npos) {
+    // When `allow_blocking_flush = false` and the file being ingested
+    // is overlapped with the memtable, `IngestExternalFile` returns
+    // an invalid argument error. It is tricky to search for the
+    // specific error message here but don't worry, the unit test
+    // ensures that we get this right. Then we can try to flush the
+    // memtable outside without blocking writes. We also set
+    // `allow_write_stall = false` to prevent the flush from
+    // triggering write stall.
+    has_flush = true;
+    FlushOptions flush_opts;
+    flush_opts.wait = true;
+    flush_opts.allow_write_stall = false;
+    // We don't check the status of this flush because we will
+    // fallback to a blocking ingestion anyway.
+    db->rep->Flush(flush_opts, handle->rep);
+    s = db->rep->IngestExternalFiles({arg});
+  }
+  SaveError(errptr, s);
+  return has_flush;
+}
+
 crocksdb_slicetransform_t* crocksdb_slicetransform_create(
     void* state, void (*destructor)(void*),
     char* (*transform)(void*, const char* key, size_t length,
@@ -5530,6 +5578,16 @@ const char* crocksdb_sst_file_meta_data_largestkey(
     const crocksdb_sst_file_meta_data_t* meta, size_t* len) {
   *len = meta->rep.largestkey.size();
   return meta->rep.largestkey.data();
+}
+
+uint64_t crocksdb_sst_file_meta_data_smallest_seqno(
+    const crocksdb_sst_file_meta_data_t* meta) {
+  return meta->rep.smallest_seqno;
+}
+
+uint64_t crocksdb_sst_file_meta_data_largest_seqno(
+    const crocksdb_sst_file_meta_data_t* meta) {
+  return meta->rep.largest_seqno;
 }
 
 crocksdb_compaction_options_t* crocksdb_compaction_options_create() {

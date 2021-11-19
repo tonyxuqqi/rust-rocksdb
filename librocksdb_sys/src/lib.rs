@@ -1889,6 +1889,18 @@ extern "C" {
         err: *mut *mut c_char,
     ) -> bool;
 
+    pub fn crocksdb_ingest_external_file_optimized_with_seqno(
+        db: *mut DBInstance,
+        handle: *const DBCFHandle,
+        file_list: *const *const c_char,
+        list_len: size_t,
+        opt: *const IngestExternalFileOptions,
+        smallest_seqnos: *const u64, 
+        largest_seqnos: *const u64, 
+        err: *mut *mut c_char,
+    ) -> bool;
+
+
     // Restore Option
     pub fn crocksdb_restore_options_create() -> *mut DBRestoreOptions;
     pub fn crocksdb_restore_options_destroy(ropts: *mut DBRestoreOptions);
@@ -2282,6 +2294,14 @@ extern "C" {
         meta: *const DBSstFileMetaData,
         len: *mut size_t,
     ) -> *const c_char;
+
+    pub fn crocksdb_sst_file_meta_data_smallest_seqno(
+        meta: *const DBSstFileMetaData,
+    ) -> u64;
+
+    pub fn crocksdb_sst_file_meta_data_largest_seqno(
+        meta: *const DBSstFileMetaData,
+    ) -> u64;
 
     pub fn crocksdb_compaction_options_create() -> *mut DBCompactionOptions;
     pub fn crocksdb_compaction_options_destroy(opts: *mut DBCompactionOptions);

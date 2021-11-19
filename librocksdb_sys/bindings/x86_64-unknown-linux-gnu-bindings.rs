@@ -3553,6 +3553,20 @@ extern "C" {
         errptr: *mut *mut libc::c_char,
     ) -> libc::c_uchar;
 }
+
+extern "C" {
+    pub fn crocksdb_ingest_external_file_optimized_with_seqno(
+        db: *mut crocksdb_t,
+        handle: *mut crocksdb_column_family_handle_t,
+        file_list: *const *const libc::c_char,
+        list_len: size_t,
+        opt: *const crocksdb_ingestexternalfileoptions_t,
+        smallest_seqnos: *const u64, 
+        largest_seqnos: *const u64, 
+        errptr: *mut *mut libc::c_char,
+    ) -> libc::c_uchar;
+}
+
 extern "C" {
     pub fn crocksdb_slicetransform_create(
         state: *mut libc::c_void,
@@ -4097,6 +4111,16 @@ extern "C" {
         arg1: *const crocksdb_sst_file_meta_data_t,
         arg2: *mut size_t,
     ) -> *const libc::c_char;
+}
+extern "C" {
+    pub fn crocksdb_sst_file_meta_data_smallest_seqno(
+        arg1: *const crocksdb_sst_file_meta_data_t,
+    ) -> u64;
+}
+extern "C" {
+    pub fn crocksdb_sst_file_meta_data_largest_seqno(
+        arg1: *const crocksdb_sst_file_meta_data_t,
+    ) -> u64;
 }
 extern "C" {
     pub fn crocksdb_compaction_options_create() -> *mut crocksdb_compaction_options_t;
