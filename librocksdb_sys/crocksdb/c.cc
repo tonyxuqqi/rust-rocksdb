@@ -4638,11 +4638,11 @@ unsigned char crocksdb_ingest_external_file_optimized_with_seqno(
     const crocksdb_ingestexternalfileoptions_t* opt, const uint64_t* smallest_seqnos, const uint64_t* largest_seqnos, char** errptr)
 {
   std::vector<std::string> files(list_len);
-  std::vector<std::pair<uint64_t, uint64_t> > seqnos(list_len);
+  std::vector<std::pair<uint64_t, uint64_t> > seqnos;
   for (size_t i = 0; i < list_len; ++i) {
     files[i] = std::string(file_list[i]);
-    if (smallest_seqnos == NULL || largest_seqnos == NULL) {
-      seqnos[i] = std::pair<uint64_t, uint64_t>(*(smallest_seqnos+i), *(largest_seqnos + i));
+    if (smallest_seqnos != NULL && largest_seqnos != NULL) {
+      seqnos.push_back(std::pair<uint64_t, uint64_t>(*(smallest_seqnos+i), *(largest_seqnos + i)));
     }
   }
   bool has_flush = false;
