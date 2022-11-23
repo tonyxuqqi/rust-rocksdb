@@ -348,6 +348,9 @@ pub struct WriteBufferManager {
     pub inner: *mut DBWriteBufferManager,
 }
 
+unsafe impl Send for WriteBufferManager {}
+unsafe impl Sync for WriteBufferManager {}
+
 impl WriteBufferManager {
     pub fn new(flush_size: usize, stall_ratio: f32, flush_oldest_first: bool) -> Self {
         unsafe {
