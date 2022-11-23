@@ -23,8 +23,8 @@ use crocksdb_ffi::{
     DBCompactionOptions, DBCompressionType, DBFifoCompactionOptions, DBFlushOptions,
     DBInfoLogLevel, DBInstance, DBLRUCacheOptions, DBRateLimiter, DBRateLimiterMode, DBReadOptions,
     DBRecoveryMode, DBRestoreOptions, DBSnapshot, DBStatistics, DBStatisticsHistogramType,
-    DBStatisticsTickerType, DBTitanDBOptions, DBTitanReadOptions, DBWriteOptions, IndexType,
-    Options, PrepopulateBlockCache,
+    DBStatisticsTickerType, DBTitanDBOptions, DBTitanReadOptions, DBWriteBufferManager,
+    DBWriteOptions, IndexType, Options, PrepopulateBlockCache,
 };
 use event_listener::{new_event_listener, EventListener};
 use libc::{self, c_double, c_int, c_uchar, c_void, size_t};
@@ -340,6 +340,32 @@ impl Drop for Statistics {
     fn drop(&mut self) {
         unsafe {
             crocksdb_ffi::crocksdb_statistics_destroy(self.inner);
+        }
+    }
+}
+
+pub struct WriteBufferManager {
+    pub inner: *mut DBWriteBufferManager,
+}
+
+impl WriteBufferManager {
+    pub fn new(flush_size: usize, stall_ratio: f32, flush_oldest_first: bool) -> Self {
+        unsafe {
+            Self {
+                inner: crocksdb_ffi::crocksdb_write_buffer_manager_create(
+                    flush_size,
+                    stall_ratio,
+                    flush_oldest_first,
+                ),
+            }
+        }
+    }
+}
+
+impl Drop for WriteBufferManager {
+    fn drop(&mut self) {
+        unsafe {
+            crocksdb_ffi::crocksdb_write_buffer_manager_destroy(self.inner);
         }
     }
 }
@@ -1457,6 +1483,12 @@ impl ColumnFamilyOptions {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_env(self.inner, env.inner);
             self.env = Some(env);
+        }
+    }
+
+    pub fn set_write_buffer_manager(&mut self, wbm: &WriteBufferManager) {
+        unsafe {
+            crocksdb_ffi::crocksdb_options_set_write_buffer_manager(self.inner, wbm.inner);
         }
     }
 

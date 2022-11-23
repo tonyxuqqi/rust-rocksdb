@@ -129,6 +129,7 @@ typedef struct crocksdb_sstfilereader_t crocksdb_sstfilereader_t;
 typedef struct crocksdb_sstfilewriter_t crocksdb_sstfilewriter_t;
 typedef struct crocksdb_externalsstfileinfo_t crocksdb_externalsstfileinfo_t;
 typedef struct crocksdb_ratelimiter_t crocksdb_ratelimiter_t;
+typedef struct crocksdb_write_buffer_manager_t crocksdb_write_buffer_manager_t;
 typedef struct crocksdb_statistics_t crocksdb_statistics_t;
 typedef struct crocksdb_pinnableslice_t crocksdb_pinnableslice_t;
 typedef struct crocksdb_user_collected_properties_t
@@ -1055,6 +1056,8 @@ extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_paranoid_checks(
     crocksdb_options_t*, unsigned char);
 extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_env(crocksdb_options_t*,
                                                            crocksdb_env_t*);
+extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_write_buffer_manager(
+    crocksdb_options_t*, crocksdb_write_buffer_manager_t*);
 extern C_ROCKSDB_LIBRARY_API crocksdb_logger_t* crocksdb_logger_create(
     void* rep, void (*destructor_)(void*), crocksdb_logger_logv_cb logv);
 extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_info_log(
@@ -1394,6 +1397,12 @@ extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_atomic_flush(
     crocksdb_options_t* opt, unsigned char enable);
 extern C_ROCKSDB_LIBRARY_API void crocksdb_options_avoid_flush_during_shutdown(
     crocksdb_options_t* opt, unsigned char avoid);
+
+extern C_ROCKSDB_LIBRARY_API crocksdb_write_buffer_manager_t*
+crocksdb_write_buffer_manager_create(size_t flush_size, float stall_ratio,
+                                     unsigned char flush_oldest_first);
+extern C_ROCKSDB_LIBRARY_API void crocksdb_write_buffer_manager_destroy(
+    crocksdb_write_buffer_manager_t* wbm);
 
 enum {
   compaction_by_compensated_size = 0,

@@ -54,6 +54,7 @@
 #include "rocksdb/utilities/options_util.h"
 #include "rocksdb/utilities/table_properties_collectors.h"
 #include "rocksdb/write_batch.h"
+#include "rocksdb/write_buffer_manager.h"
 #include "src/blob_format.h"
 #include "table/block_based/block_based_table_factory.h"
 #include "table/sst_file_writer_collectors.h"
@@ -158,6 +159,7 @@ using rocksdb::UserCollectedProperties;
 using rocksdb::WALRecoveryMode;
 using rocksdb::WritableFile;
 using rocksdb::WriteBatch;
+using rocksdb::WriteBufferManager;
 using rocksdb::WriteOptions;
 using rocksdb::WriteStallCondition;
 using rocksdb::WriteStallInfo;
@@ -356,6 +358,9 @@ struct crocksdb_externalsstfileinfo_t {
 };
 struct crocksdb_ratelimiter_t {
   std::shared_ptr<RateLimiter> rep;
+};
+struct crocksdb_write_buffer_manager_t {
+  std::shared_ptr<WriteBufferManager> rep;
 };
 struct crocksdb_statistics_t {
   std::shared_ptr<Statistics> rep;
@@ -2645,6 +2650,11 @@ void crocksdb_options_set_env(crocksdb_options_t* opt, crocksdb_env_t* env) {
   opt->rep.env = (env ? env->rep : nullptr);
 }
 
+void crocksdb_options_set_write_buffer_manager(
+    crocksdb_options_t* opt, crocksdb_write_buffer_manager_t* wbm) {
+  opt->rep.write_buffer_manager = wbm->rep;
+}
+
 crocksdb_logger_t* crocksdb_logger_create(void* rep, void (*destructor_)(void*),
                                           crocksdb_logger_logv_cb logv) {
   crocksdb_logger_t* logger = new crocksdb_logger_t;
@@ -3555,6 +3565,22 @@ unsigned char crocksdb_ratelimiter_get_auto_tuned(
 int64_t crocksdb_ratelimiter_get_total_requests(crocksdb_ratelimiter_t* limiter,
                                                 unsigned char pri) {
   return limiter->rep->GetTotalRequests(static_cast<Env::IOPriority>(pri));
+}
+
+crocksdb_write_buffer_manager_t* crocksdb_write_buffer_manager_create(
+    size_t flush_size, float stall_ratio, unsigned char flush_oldest_first) {
+  crocksdb_write_buffer_manager_t* wbm = new crocksdb_write_buffer_manager_t;
+  wbm->rep = std::make_shared<WriteBufferManager>(
+      flush_size, nullptr, stall_ratio, flush_oldest_first);
+  return wbm;
+}
+
+void crocksdb_write_buffer_manager_destroy(
+    crocksdb_write_buffer_manager_t* wbm) {
+  if (wbm->rep) {
+    wbm->rep.reset();
+  }
+  delete wbm;
 }
 
 /*
