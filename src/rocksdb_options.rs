@@ -984,6 +984,12 @@ impl DBOptions {
         }
     }
 
+    pub fn set_write_buffer_manager(&mut self, wbm: &WriteBufferManager) {
+        unsafe {
+            crocksdb_ffi::crocksdb_options_set_write_buffer_manager(self.inner, wbm.inner);
+        }
+    }
+
     pub fn set_statistics(&mut self, s: &Statistics) {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_statistics(self.inner, s.inner);
@@ -1486,12 +1492,6 @@ impl ColumnFamilyOptions {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_env(self.inner, env.inner);
             self.env = Some(env);
-        }
-    }
-
-    pub fn set_write_buffer_manager(&mut self, wbm: &WriteBufferManager) {
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_write_buffer_manager(self.inner, wbm.inner);
         }
     }
 
