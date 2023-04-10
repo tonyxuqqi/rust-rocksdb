@@ -1001,8 +1001,15 @@ extern "C" {
 
     pub fn crocksdb_concurrent_task_limiter_create(
         name: *const c_char,
-        limit: u32,
+        limit: i32,
     ) -> *mut DBConcurrentTaskLimiter;
+    pub fn crocksdb_concurrent_task_limiter_set_max_outstanding_task(
+        limiter: *mut DBConcurrentTaskLimiter,
+        limit: i32,
+    );
+    pub fn crocksdb_concurrent_task_limiter_reset_max_outstanding_task(
+        limiter: *mut DBConcurrentTaskLimiter,
+    );
     pub fn crocksdb_concurrent_task_limiter_destroy(limiter: *mut DBConcurrentTaskLimiter);
 
     pub fn crocksdb_options_set_soft_pending_compaction_bytes_limit(options: *mut Options, v: u64);

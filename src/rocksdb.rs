@@ -3845,6 +3845,8 @@ mod test {
             opts.set_compaction_thread_limiter(&limiter);
             cfs_opts.push(opts);
         }
+        limiter.reset_max_outstanding_task();
+        limiter.set_max_outstanding_task(2);
         let mut opts = DBOptions::new();
         opts.create_if_missing(true);
         opts.create_missing_column_families(true);

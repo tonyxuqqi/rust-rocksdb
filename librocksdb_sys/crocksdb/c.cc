@@ -3681,11 +3681,21 @@ void crocksdb_write_buffer_manager_destroy(
 }
 
 crocksdb_concurrent_task_limiter_t* crocksdb_concurrent_task_limiter_create(
-    const char* name, uint32_t limit) {
+    const char* name, int32_t limit) {
   crocksdb_concurrent_task_limiter_t* limiter =
       new crocksdb_concurrent_task_limiter_t;
   limiter->rep.reset(NewConcurrentTaskLimiter(name, limit));
   return limiter;
+}
+
+void crocksdb_concurrent_task_limiter_set_max_outstanding_task(
+    crocksdb_concurrent_task_limiter_t* limiter, int32_t limit) {
+  limiter->rep->SetMaxOutstandingTask(limit);
+}
+
+void crocksdb_concurrent_task_limiter_reset_max_outstanding_task(
+    crocksdb_concurrent_task_limiter_t* limiter) {
+  limiter->rep->ResetMaxOutstandingTask();
 }
 
 void crocksdb_concurrent_task_limiter_destroy(

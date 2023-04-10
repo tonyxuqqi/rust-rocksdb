@@ -474,12 +474,29 @@ unsafe impl Send for ConcurrentTaskLimiter {}
 unsafe impl Sync for ConcurrentTaskLimiter {}
 
 impl ConcurrentTaskLimiter {
-    pub fn new(name: &str, limit: u32) -> Self {
+    /// Create a new concurrent task limiter.
+    ///
+    /// `limit < 0` means no limit, `limit = 0` means no task can be scheduled.
+    pub fn new(name: &str, limit: i32) -> Self {
         let name = CString::new(name.as_bytes()).unwrap();
         unsafe {
             Self {
                 inner: crocksdb_ffi::crocksdb_concurrent_task_limiter_create(name.as_ptr(), limit),
             }
+        }
+    }
+
+    pub fn set_max_outstanding_task(&self, limit: i32) {
+        unsafe {
+            crocksdb_ffi::crocksdb_concurrent_task_limiter_set_max_outstanding_task(
+                self.inner, limit,
+            );
+        }
+    }
+
+    pub fn reset_max_outstanding_task(&self) {
+        unsafe {
+            crocksdb_ffi::crocksdb_concurrent_task_limiter_reset_max_outstanding_task(self.inner);
         }
     }
 }
