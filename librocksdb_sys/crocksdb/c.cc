@@ -3525,6 +3525,17 @@ crocksdb_ratelimiter_t* crocksdb_options_get_ratelimiter(
   return nullptr;
 }
 
+crocksdb_write_buffer_manager_t* crocksdb_options_get_write_buffer_manager(
+    crocksdb_options_t* opt) {
+  if (opt->rep.write_buffer_manager != nullptr) {
+    crocksdb_write_buffer_manager_t* manager =
+        new crocksdb_write_buffer_manager_t;
+    manager->rep = opt->rep.write_buffer_manager;
+    return manager;
+  }
+  return nullptr;
+}
+
 void crocksdb_options_set_vector_memtable_factory(crocksdb_options_t* opt,
                                                   uint64_t reserved_bytes) {
   opt->rep.memtable_factory.reset(new VectorRepFactory(reserved_bytes));
@@ -3673,6 +3684,21 @@ crocksdb_write_buffer_manager_t* crocksdb_write_buffer_manager_create(
   wbm->rep = std::make_shared<WriteBufferManager>(
       flush_size, nullptr, stall_ratio, flush_oldest_first);
   return wbm;
+}
+
+void crocksdb_write_buffer_manager_set_flush_size(
+    crocksdb_write_buffer_manager_t* wbm, size_t flush_size) {
+  wbm->rep->SetFlushSize(flush_size);
+}
+
+void crocksdb_write_buffer_manager_set_flush_oldest_first(
+    crocksdb_write_buffer_manager_t* wbm, unsigned char flush_oldest_first) {
+  wbm->rep->SetFlushOldestFirst(flush_oldest_first);
+}
+
+size_t crocksdb_write_buffer_manager_memory_usage(
+    crocksdb_write_buffer_manager_t* wbm) {
+  return wbm->rep->memory_usage();
 }
 
 void crocksdb_write_buffer_manager_destroy(

@@ -456,6 +456,22 @@ impl WriteBufferManager {
             }
         }
     }
+
+    pub fn set_flush_size(&self, s: usize) {
+        unsafe {
+            crocksdb_ffi::crocksdb_write_buffer_manager_set_flush_size(self.inner, s);
+        }
+    }
+
+    pub fn set_flush_oldest_first(&self, f: bool) {
+        unsafe {
+            crocksdb_ffi::crocksdb_write_buffer_manager_set_flush_oldest_first(self.inner, f);
+        }
+    }
+
+    pub fn memory_usage(&self) -> usize {
+        unsafe { crocksdb_ffi::crocksdb_write_buffer_manager_memory_usage(self.inner) }
+    }
 }
 
 impl Drop for WriteBufferManager {
@@ -1221,6 +1237,16 @@ impl DBOptions {
             None
         } else {
             Some(RateLimiter { inner: limiter })
+        }
+    }
+
+    pub fn get_write_buffer_manager(&self) -> Option<WriteBufferManager> {
+        let manager =
+            unsafe { crocksdb_ffi::crocksdb_options_get_write_buffer_manager(self.inner) };
+        if manager.is_null() {
+            None
+        } else {
+            Some(WriteBufferManager { inner: manager })
         }
     }
 

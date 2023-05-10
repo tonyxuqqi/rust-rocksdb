@@ -1439,6 +1439,8 @@ extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_ratelimiter(
     crocksdb_options_t* opt, crocksdb_ratelimiter_t* limiter);
 extern C_ROCKSDB_LIBRARY_API crocksdb_ratelimiter_t*
 crocksdb_options_get_ratelimiter(crocksdb_options_t* opt);
+extern C_ROCKSDB_LIBRARY_API crocksdb_write_buffer_manager_t*
+crocksdb_options_get_write_buffer_manager(crocksdb_options_t* opt);
 extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_vector_memtable_factory(
     crocksdb_options_t* opt, uint64_t reserved_bytes);
 extern C_ROCKSDB_LIBRARY_API void crocksdb_options_set_atomic_flush(
@@ -1451,6 +1453,16 @@ extern C_ROCKSDB_LIBRARY_API void crocksdb_options_avoid_flush_during_shutdown(
 extern C_ROCKSDB_LIBRARY_API crocksdb_write_buffer_manager_t*
 crocksdb_write_buffer_manager_create(size_t flush_size, float stall_ratio,
                                      unsigned char flush_oldest_first);
+extern C_ROCKSDB_LIBRARY_API void crocksdb_write_buffer_manager_set_flush_size(
+    crocksdb_write_buffer_manager_t* wbm, size_t flush_size);
+
+extern C_ROCKSDB_LIBRARY_API void
+crocksdb_write_buffer_manager_set_flush_oldest_first(
+    crocksdb_write_buffer_manager_t* wbm, unsigned char flush_oldest_first);
+
+extern C_ROCKSDB_LIBRARY_API size_t crocksdb_write_buffer_manager_memory_usage(
+    crocksdb_write_buffer_manager_t* wbm);
+
 extern C_ROCKSDB_LIBRARY_API void crocksdb_write_buffer_manager_destroy(
     crocksdb_write_buffer_manager_t* wbm);
 

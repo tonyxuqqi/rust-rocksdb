@@ -937,6 +937,9 @@ extern "C" {
     pub fn crocksdb_options_get_force_consistency_checks(options: *mut Options) -> bool;
     pub fn crocksdb_options_set_ratelimiter(options: *mut Options, limiter: *mut DBRateLimiter);
     pub fn crocksdb_options_get_ratelimiter(options: *mut Options) -> *mut DBRateLimiter;
+    pub fn crocksdb_options_get_write_buffer_manager(
+        options: *mut Options,
+    ) -> *mut DBWriteBufferManager;
     pub fn crocksdb_options_set_info_log(options: *mut Options, logger: *mut DBLogger);
     pub fn crocksdb_options_get_block_cache_usage(options: *const Options) -> usize;
     pub fn crocksdb_options_set_block_cache_capacity(
@@ -997,6 +1000,15 @@ extern "C" {
         stall_ratio: c_float,
         flush_oldest_first: bool,
     ) -> *mut DBWriteBufferManager;
+    pub fn crocksdb_write_buffer_manager_set_flush_size(
+        wbm: *mut DBWriteBufferManager,
+        flush_size: size_t,
+    );
+    pub fn crocksdb_write_buffer_manager_set_flush_oldest_first(
+        wbm: *mut DBWriteBufferManager,
+        flush_oldest_first: bool,
+    );
+    pub fn crocksdb_write_buffer_manager_memory_usage(wbm: *mut DBWriteBufferManager) -> usize;
     pub fn crocksdb_write_buffer_manager_destroy(wbm: *mut DBWriteBufferManager);
 
     pub fn crocksdb_concurrent_task_limiter_create(
