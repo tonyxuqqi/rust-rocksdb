@@ -6,4 +6,4 @@
 [submodule "titan"]
 	path = librocksdb_sys/libtitan_sys/titan
 	url = https://github.com/tonyxuqqi/titan.git
-	branch = revert_titan
+	branch = revert_lazy_load
