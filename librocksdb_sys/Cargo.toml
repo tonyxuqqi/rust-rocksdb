@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Jay Lee <busyjaylee@gmail.com>"]
 build = "build.rs"
 links = "rocksdb"
+license = "Apache-2.0"
 
 [dependencies]
 bzip2-sys = { version = "0.1.11+1.0.8", features = ["static"] }
@@ -38,5 +39,5 @@ optional = true
 features = ["unprefixed_malloc_on_supported_platforms"]
 
 [dependencies.snappy-sys]
-git = "https://github.com/busyjay/rust-snappy.git"
+git = "https://github.com/tikv/rust-snappy.git"
 branch = "static-link"
